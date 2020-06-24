@@ -1,5 +1,7 @@
 {
   "name": "nearbyPlaces",
-  "integrations": {},
+  "integrations": {
+    "cordova": {}
+  },
   "type": "angular"
 }
