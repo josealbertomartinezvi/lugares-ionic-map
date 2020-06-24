@@ -1,9 +1,11 @@
-<ion-header>
+<ion-header class="ion-no-border">
   <ion-toolbar>
-    <ion-title>buscarLugares</ion-title>
+    <ion-title>Buscar Lugares</ion-title>
   </ion-toolbar>
+  <ion-searchbar debounce="500" placeholder="Buscar..." 
+  (ionChange)="buscarLugar($event)"></ion-searchbar>
 </ion-header>
 
 <ion-content>
-
+  <div id="map"></div>
 </ion-content>
