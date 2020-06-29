@@ -1,3 +1,4 @@
+import { StorageService } from './../../services/storage/storage.service';
 import { Component, OnInit } from '@angular/core';
 
 @Component({
@@ -7,9 +8,22 @@ import { Component, OnInit } from '@angular/core';
 })
 export class ListaLugaresPage implements OnInit {
 
-  constructor() { }
+  public lugares: any = [];
+
+  constructor(private storageService: StorageService) { }
 
   ngOnInit() {
+  }
+
+  ionViewDidEnter(){
+    this.getLugares();
+  }
+
+  getLugares(){
+    this.storageService.getlugares()
+    .then(lugares => {
+      this.lugares = lugares;
+    });
   }
 
 }

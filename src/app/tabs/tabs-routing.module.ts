@@ -8,6 +8,10 @@ const routes: Routes = [
     component: TabsPage,
     children: [
       {
+        path: 'inicio',
+        loadChildren: () => import('./../pages/inicio/inicio.module').then( m => m.InicioPageModule)
+      },
+      {
         path: 'buscar-lugares',
         loadChildren: () => import('./../pages/buscar-lugares/buscar-lugares.module').then( m => m.BuscarLugaresPageModule)
       },
@@ -17,14 +21,14 @@ const routes: Routes = [
       },
       {
         path: '',
-        redirectTo: '/tabs/buscar-lugares',
+        redirectTo: '/tabs/inicio',
         pathMatch: 'full'
       }
     ]
   },
   {
     path: '',
-    redirectTo: '/tabs/buscar-lugares',
+    redirectTo: '/tabs/inicio',
     pathMatch: 'full'
   }
 ];
