@@ -14,7 +14,12 @@ export class MapService {
   }
 
   service: any;
-
+  /**
+   * Inyección de dependencias
+   * 
+   * @param geolocation // Modulo de geolocalización para usar la 
+   * api de google
+   */
   constructor(public geolocation: Geolocation) { 
 
   }
@@ -41,11 +46,6 @@ export class MapService {
       zoom: 12
     });
     this.service = await new google.maps.places.PlacesService(this.ubicData.map)
-    // const marker = new google.maps.Marker({
-    //   position: {lat, lng},
-    //   map: this.map,
-    //   title: 'Mi Ubicación'
-    // });
   }
 
 }

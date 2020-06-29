@@ -11,12 +11,11 @@ export class InicioPage implements OnInit {
   constructor(private mapService: MapService) { }
 
   ngOnInit() {
-    this.mapService.getCurrentPosition()
-    .then(position => {
-      // let lat = position.coords.latitude;
-      // let lng = position.coords.longitude;
-      // this.mapService.initMap(lat, lng, 'map');
-    });
+    /**
+     * Obtener ubicación actual y solicitar prmisos de 
+     * ubicación si es necesario.
+     */
+    this.mapService.getCurrentPosition();
   }
 
 }

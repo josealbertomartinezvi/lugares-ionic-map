@@ -1,7 +1,9 @@
+import { ApiService } from './../../services/api/api.service';
 import { StorageService } from './../../services/storage/storage.service';
 import { MapService } from './../../services/map/map.service';
 import { Component, OnInit } from '@angular/core';
 import { AlertController } from '@ionic/angular';
+
 declare let google;
 
 @Component({
@@ -18,7 +20,16 @@ export class BuscarLugaresPage implements OnInit {
   public markers: any = [];
   public busqueda: string;
 
-  constructor(private mapService: MapService, private storageService: StorageService, public alertController: AlertController) { }
+  /**
+   * 
+   * Inyección de dependencias
+   * 
+   * @param apiService // servicio para comunicación para la api
+   * @param mapService // servicio para la api del mapa
+   * @param storageService // servicio del storage
+   * @param alertController // alertas y notificaciones
+   */
+  constructor(private apiService: ApiService, private mapService: MapService, private storageService: StorageService, public alertController: AlertController) { }
 
   ngOnInit() {
 
@@ -26,6 +37,10 @@ export class BuscarLugaresPage implements OnInit {
 
   ionViewDidEnter(){
     this.recetear();
+
+    /**
+     * Obtener posición actual y ubicar en el mapa
+     */
     this.mapService.getCurrentPosition()
     .then(position => {
       this.lat = position.coords.latitude;
@@ -34,6 +49,9 @@ export class BuscarLugaresPage implements OnInit {
     });
   }
 
+  /**
+   * Recetear vista del mapa
+   */
   recetear = () => {
     
     for(var i=0; i<this.markers.length; i++){
@@ -46,19 +64,29 @@ export class BuscarLugaresPage implements OnInit {
 
   }
 
+  /**
+   * 
+   * Buscar lugar escrito
+   * 
+   * @param event 
+   */
   buscarLugar = (event) =>{
 
     this.recetear();
-
     this.busqueda = event.detail.value;
+
     if(this.busqueda != ''){
       let data = {
-        location: new google.maps.LatLng(this.lat, this.lng),
-        radius: 3000,
-        keyword: this.busqueda
+        location: new google.maps.LatLng(this.lat, this.lng), // Ubicación actual
+        radius: 3000, // radio de busqueda en metros
+        keyword: this.busqueda // busqueda
       };
+
       let service = this.mapService.service;
 
+      /**
+       * Obtener listado de lugares de la api de google
+       */
       service.nearbySearch(data, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
           this.ubics = [];
@@ -74,49 +102,66 @@ export class BuscarLugaresPage implements OnInit {
     }
   }
 
-  mostrarUbicaciones(item){
+  /**
+   * 
+   * Mostrar lugares cercanos en el mapa
+   * 
+   * @param lugar 
+   */
+  mostrarUbicaciones(lugar){
     let map = this.mapService.ubicData.map;
     let infowindow = new google.maps.InfoWindow({});
       let marker = new google.maps.Marker({
         map,
-        position: item.geometry.location,
+        position: lugar.geometry.location,
       });
       marker.addListener('click', function() {
-        infowindow.setContent(item.name);
+        infowindow.setContent(lugar.name);
         infowindow.open(map, this);
       });
       this.markers.push(marker);
   }
 
-  calcularDistancia(item){
+  /**
+   * 
+   * Calcular distancia entre la ubicación actual 
+   * y el lugar encontrado
+   * 
+   * @param lugar 
+   */
+  calcularDistancia(lugar){
     let request = {
       origin: this.mapService.ubicData.myUbic,
-      destination: item.geometry.location,
+      destination: lugar.geometry.location,
       travelMode: google.maps.TravelMode.DRIVING,
     }
-    let directionsService = new google.maps.DirectionsService();
-    let data = {};
+    let directionsService = new google.maps.DirectionsService(); // Servicio de google para obtener la distancia
+    let data = {}; // variable para almacenar los datos importantes
 
-    // Routing .slice(0, -3)
     directionsService.route(request, (result, status) => {
         if(status == google.maps.DirectionsStatus.OK) {
-          data['nombre'] = item.name;
+          data['nombre'] = lugar.name;
           data['direccion'] = result.routes[0].legs[0].end_address;
           data['distancia'] = result.routes[0].legs[0].distance.text;
           data['lat_origen'] = request.origin['lat']();
           data['lng_origen'] = request.origin['lng']();
           data['lat_destino'] = request.destination['lat']();
           data['lng_destino'] = request.destination['lng']();
-          data['position'] = item.geometry.location;
 
-          this.mostrarUbicaciones(item);
+          this.mostrarUbicaciones(lugar);
 
           this.ubics.push(data);
         }
     });
   }
 
-  async savePlace(item){
+  /**
+   * 
+   * Guardar lugares seleccionados
+   * 
+   * @param lugar 
+   */
+  async savePlace(lugar){
     const alert = await this.alertController.create({
       cssClass: 'my-custom-class',
       header: 'Confirmar!',
@@ -132,25 +177,47 @@ export class BuscarLugaresPage implements OnInit {
         }, {
           text: 'Si',
           handler: () => {
-            item['busqueda'] = this.busqueda;
-            this.storageService.getlugares()
-            .then(async lugares => {
-              if(lugares == null){
-                let registro = [];
-                registro[0] = item;
-                this.storageService.saveData('lugares', registro);
+            lugar['busqueda'] = this.busqueda;
+            this.apiService.guardarLugar(lugar).subscribe(async res => {
+              console.log(res)
+              if(res['success']){
+                const alert = await this.alertController.create({
+                  cssClass: 'my-custom-class',
+                  header: 'Información!',
+                  message: 'Ubicación guardada correctamente.',
+                  buttons: ['OK']
+                });
+                await alert.present();
               }else{
-                lugares.push(item);
-                this.storageService.saveData('lugares', lugares);
+                const alert = await this.alertController.create({
+                  cssClass: 'my-custom-class',
+                  header: 'Información!',
+                  message: 'Error al guardar ubicación.',
+                  buttons: ['OK']
+                });
+                await alert.present();
               }
-              const alert = await this.alertController.create({
-                cssClass: 'my-custom-class',
-                header: 'Información!',
-                message: 'Ubicación guardada correctamente.',
-                buttons: ['OK']
-              });
-              await alert.present();
             });
+
+            // Guardar lugar en el storage
+            // this.storageService.getlugares()
+            // .then(async lugares => {
+            //   if(lugares == null){
+            //     let registro = [];
+            //     registro[0] = item;
+            //     this.storageService.saveData('lugares', registro);
+            //   }else{
+            //     lugares.push(item);
+            //     this.storageService.saveData('lugares', lugares);
+            //   }
+            //   const alert = await this.alertController.create({
+            //     cssClass: 'my-custom-class',
+            //     header: 'Información!',
+            //     message: 'Ubicación guardada correctamente.',
+            //     buttons: ['OK']
+            //   });
+            //   await alert.present();
+            // });
           }
         }
       ]
