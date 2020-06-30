@@ -62,7 +62,6 @@ export class BuscarLugaresPage implements OnInit {
     this.ubicaciones = [];
     this.ubics = [];
     this.busqueda = '';
-    this.distancias = [];
 
   }
 
