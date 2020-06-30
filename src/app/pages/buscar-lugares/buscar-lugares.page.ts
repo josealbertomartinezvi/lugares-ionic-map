@@ -57,9 +57,9 @@ export class BuscarLugaresPage implements OnInit {
     for(var i=0; i<this.markers.length; i++){
       this.markers[i].setMap(null);
     }
-    document.getElementById('map').style.height="100%";
-    document.getElementById('lista').style.display="none";
-    this.ubics = [];
+    // document.getElementById('map').style.height="100%";
+    // document.getElementById('lista').style.display="none";
+    this.ubicaciones = [];
     this.busqueda = '';
 
   }
@@ -71,7 +71,7 @@ export class BuscarLugaresPage implements OnInit {
    * @param event 
    */
   buscarLugar = (event) =>{
-
+ 
     this.recetear();
     this.busqueda = event.detail.value;
 
@@ -89,13 +89,13 @@ export class BuscarLugaresPage implements OnInit {
        */
       service.nearbySearch(data, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
-          this.ubics = [];
+          
           results.map(item => {
             this.calcularDistancia(item);
           });
           this.ubicaciones = this.ubics;
-          document.getElementById('map').style.height="50%";
-          document.getElementById('lista').style.display="block";
+          // document.getElementById('map').style.height="50%";
+          // document.getElementById('lista').style.display="block";
         }
 
       });
@@ -114,6 +114,9 @@ export class BuscarLugaresPage implements OnInit {
       let marker = new google.maps.Marker({
         map,
         position: lugar.geometry.location,
+        icon: {
+          url: "http://maps.google.com/mapfiles/ms/icons/blue-dot.png"                           
+        }
       });
       marker.addListener('click', function() {
         infowindow.setContent(lugar.name);
