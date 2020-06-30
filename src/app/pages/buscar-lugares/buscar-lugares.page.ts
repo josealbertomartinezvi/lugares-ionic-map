@@ -57,8 +57,6 @@ export class BuscarLugaresPage implements OnInit {
     for(var i=0; i<this.markers.length; i++){
       this.markers[i].setMap(null);
     }
-    // document.getElementById('map').style.height="100%";
-    // document.getElementById('lista').style.display="none";
     this.ubicaciones = [];
     this.ubics = [];
     this.busqueda = '';
@@ -102,8 +100,6 @@ export class BuscarLugaresPage implements OnInit {
             this.mostrarListado();
           }, 2000);
           
-          // document.getElementById('map').style.height="50%";
-          // document.getElementById('lista').style.display="block";
         }
       });
     }
