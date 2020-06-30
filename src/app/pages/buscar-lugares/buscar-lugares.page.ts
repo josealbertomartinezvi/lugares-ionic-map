@@ -60,7 +60,9 @@ export class BuscarLugaresPage implements OnInit {
     // document.getElementById('map').style.height="100%";
     // document.getElementById('lista').style.display="none";
     this.ubicaciones = [];
+    this.ubics = [];
     this.busqueda = '';
+    this.distancias = [];
 
   }
 
@@ -90,16 +92,36 @@ export class BuscarLugaresPage implements OnInit {
       service.nearbySearch(data, (results, status) => {
         if (status === google.maps.places.PlacesServiceStatus.OK) {
           
-          results.map(item => {
-            this.calcularDistancia(item);
+          results.map((item, index) => {
+            try{
+              this.calcularDistancia(item);
+            }catch(error){
+
+            }
           });
-          this.ubicaciones = this.ubics;
+          setTimeout(() => {
+            this.mostrarListado();
+          }, 2000);
+          
           // document.getElementById('map').style.height="50%";
           // document.getElementById('lista').style.display="block";
         }
-
       });
     }
+  }
+
+  /**
+   * Muestra la lista de resultados de la busqueda
+   */
+  mostrarListado(){
+
+    this.ubics.sort(function (prev, next) {
+      return ((prev['distancia'] < next['distancia']) ? -1 : ((prev['distancia'] > next['distancia']) ? 1 : 0));
+    });
+    this.ubics[0]['mas_cercana'] = true;
+    this.ubicaciones = this.ubics;
+    console.log(this.ubicaciones)
+
   }
 
   /**
@@ -145,15 +167,17 @@ export class BuscarLugaresPage implements OnInit {
         if(status == google.maps.DirectionsStatus.OK) {
           data['nombre'] = lugar.name;
           data['direccion'] = result.routes[0].legs[0].end_address;
-          data['distancia'] = result.routes[0].legs[0].distance.text;
+          data['distancia'] = result.routes[0].legs[0].distance.text.slice(0,-3);
           data['lat_origen'] = request.origin['lat']();
           data['lng_origen'] = request.origin['lng']();
           data['lat_destino'] = request.destination['lat']();
           data['lng_destino'] = request.destination['lng']();
+          data['mas_cercana'] = false;
 
           this.mostrarUbicaciones(lugar);
 
           this.ubics.push(data);
+
         }
     });
   }
@@ -175,7 +199,7 @@ export class BuscarLugaresPage implements OnInit {
           role: 'cancel',
           cssClass: 'secondary',
           handler: (blah) => {
-            
+
           }
         }, {
           text: 'Si',
