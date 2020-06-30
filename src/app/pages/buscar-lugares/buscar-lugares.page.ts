@@ -106,16 +106,18 @@ export class BuscarLugaresPage implements OnInit {
   }
 
   /**
-   * Muestra la lista de resultados de la busqueda
+   * Muestra la lista de resultados de la busqueda.
+   * Organiza ese listado de menor a mayor a partir de la distancia.
    */
   mostrarListado(){
 
     this.ubics.sort(function (prev, next) {
       return ((prev['distancia'] < next['distancia']) ? -1 : ((prev['distancia'] > next['distancia']) ? 1 : 0));
     });
+
     this.ubics[0]['mas_cercana'] = true;
+
     this.ubicaciones = this.ubics;
-    console.log(this.ubicaciones)
 
   }
 
@@ -226,10 +228,10 @@ export class BuscarLugaresPage implements OnInit {
             // .then(async lugares => {
             //   if(lugares == null){
             //     let registro = [];
-            //     registro[0] = item;
+            //     registro[0] = lugar;
             //     this.storageService.saveData('lugares', registro);
             //   }else{
-            //     lugares.push(item);
+            //     lugares.push(lugar);
             //     this.storageService.saveData('lugares', lugares);
             //   }
             //   const alert = await this.alertController.create({
